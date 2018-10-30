@@ -1,0 +1,42 @@
+{
+  "name": "api-mock-jest",
+  "version": "1.0.0",
+  "description": "Matchers to test API calls for Jest",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest tests",
+    "build": "babel src --presets babel-preset-es2015 --out-dir dist",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adimux/api-mock-jest.git"
+  },
+  "author": "adimux",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adimux/api-mock-jest/issues"
+  },
+  "homepage": "https://github.com/adimux/api-mock-jest#readme",
+  "dependencies": {
+    "api-mock": "file:///home/acherti/Code/alaya/api-mock",
+    "jest": "^22.4.0"
+  },
+  "devDependencies": {
+    "api-mock": "file:///home/acherti/Code/alaya/api-mock",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "jest": "^22.4.4",
+    "regenerator-runtime": "^0.12.1"
+  },
+  "jest": {
+    "verbose": true,
+    "testURL": "http://test",
+    "roots": [
+      "./tests"
+    ]
+  }
+}
