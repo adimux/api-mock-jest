@@ -60,8 +60,8 @@ exports.default = {
     var routeCalls = _apiMock2.default.calls.filter(route.name);
     var matchingCalls = _apiMock2.default.calls.filter(route.name, expectedOptions);
 
-    var routeCalled = routeCalls.calls.length > 0;
-    var optionsMatch = matchingCalls.calls.length > 0;
+    var routeCalled = routeCalls.length > 0;
+    var optionsMatch = matchingCalls.length > 0;
 
     if (routeCalled && optionsMatch) {
       return {
@@ -71,7 +71,7 @@ exports.default = {
         }
       };
     } else if (routeCalled && !optionsMatch) {
-      var call = last(routeCalls.calls);
+      var call = last(routeCalls);
       var optionsKeys = Object.keys(expectedOptions);
       var actualOptions = pick(call, optionsKeys);
       var diffString = (0, _jestDiff2.default)(normalizeOptions(expectedOptions), actualOptions, {

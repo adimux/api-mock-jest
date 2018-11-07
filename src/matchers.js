@@ -40,8 +40,8 @@ export default {
     const routeCalls = apiMock.calls.filter(route.name);
     const matchingCalls = apiMock.calls.filter(route.name, expectedOptions);
 
-    const routeCalled = routeCalls.calls.length > 0;
-    const optionsMatch = matchingCalls.calls.length > 0;
+    const routeCalled = routeCalls.length > 0;
+    const optionsMatch = matchingCalls.length > 0;
 
     if (routeCalled && optionsMatch) {
       return {
@@ -49,7 +49,7 @@ export default {
         message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n${this.utils.printExpected(expectedOptions)}`,
       };
     } else if (routeCalled && !optionsMatch) {
-      const call = last(routeCalls.calls);
+      const call = last(routeCalls);
       const optionsKeys = Object.keys(expectedOptions);
       const actualOptions = pick(call, optionsKeys);
       const diffString = diff(normalizeOptions(expectedOptions), actualOptions, {
