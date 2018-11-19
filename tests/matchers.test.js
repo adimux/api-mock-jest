@@ -1,6 +1,4 @@
 import matchers from '../src/matchers';
-import ApiMock from 'api-mock';
-import jestDiff from 'jest-diff';
 
 jest.mock('jest-diff', () => {
   return (expected, actual) => {
@@ -8,10 +6,18 @@ jest.mock('jest-diff', () => {
   }
 })
 
+
+const ApiMock = {
+  called: jest.fn(),
+  calls: {
+    filter: jest.fn(),
+  }
+}
+
 const {
   toHaveBeenRequested,
   toHaveBeenRequestedWith,
-} = matchers;
+} = matchers(ApiMock);
 
 
 function mockRouteFactory(name) {
@@ -47,7 +53,7 @@ describe('ApiMock Matchers', () => {
     let route = mockRouteFactory('get_dashboard');
 
     beforeEach(() => {
-      ApiMock.called = jest.fn();
+      ApiMock.called.mockReset();
     })
 
     it('should mark as pass if the route was called', () => {
@@ -75,7 +81,7 @@ describe('ApiMock Matchers', () => {
     let route = mockRouteFactory('get_dashboard');
 
     beforeEach(() => {
-      ApiMock.calls.filter = jest.fn();
+      ApiMock.calls.filter.mockReset();
     })
 
     describe('Given the route was called with the right options', () => {
@@ -100,8 +106,8 @@ describe('ApiMock Matchers', () => {
       beforeEach(() => {
         routeCalls = [mockCallFactory()];
         matchingCalls = [mockCallFactory()];
-        ApiMock.calls.filter.mockReturnValueOnce({ calls: routeCalls });
-        ApiMock.calls.filter.mockReturnValueOnce({ calls: matchingCalls });
+        ApiMock.calls.filter.mockReturnValueOnce(routeCalls);
+        ApiMock.calls.filter.mockReturnValueOnce(matchingCalls);
         matchResult = toHaveBeenRequestedWith.call(
           mockMatcherContext,
           route,
@@ -119,6 +125,10 @@ describe('ApiMock Matchers', () => {
     })
 
     describe('Given the route was called, but with the wrong options', () => {
+      beforeEach(() => {
+        ApiMock.calls.filter.mockReset();
+      })
+
       let lastCall;
       let matchResult;
       let expectedOptions = {
@@ -138,8 +148,8 @@ describe('ApiMock Matchers', () => {
 
       beforeEach(() => {
         lastCall = mockCallFactory({ query: { bla: 'bla' }, params: { si: 'so' }, route: { name: 'dashboard' } });
-        ApiMock.calls.filter.mockReturnValueOnce({ calls: [mockRouteFactory(), mockRouteFactory(), lastCall] });
-        ApiMock.calls.filter.mockReturnValueOnce({ calls: [] });
+        ApiMock.calls.filter.mockReturnValueOnce([mockRouteFactory(), mockRouteFactory(), lastCall]);
+        ApiMock.calls.filter.mockReturnValueOnce([]);
         matchResult = toHaveBeenRequestedWith.call(
           mockMatcherContext,
           route,
@@ -165,6 +175,10 @@ describe('ApiMock Matchers', () => {
   })
 
   describe('Given the route was not called at all', () => {
+    beforeEach(() => {
+      ApiMock.calls.filter.mockReset();
+    })
+
     const route = mockRouteFactory('get_dashboard');
     let matchResult;
     let expectedOptions = {
@@ -183,8 +197,8 @@ describe('ApiMock Matchers', () => {
     };
 
     beforeEach(() => {
-      ApiMock.calls.filter.mockReturnValueOnce({ calls: [] });
-      ApiMock.calls.filter.mockReturnValueOnce({ calls: [] });
+      ApiMock.calls.filter.mockReturnValueOnce([]);
+      ApiMock.calls.filter.mockReturnValueOnce([]);
       matchResult = toHaveBeenRequestedWith.call(
         mockMatcherContext,
         route,

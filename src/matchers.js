@@ -1,6 +1,5 @@
 import diff from 'jest-diff';
-import apiMock from 'api-mock';
-import { normalizeParams } from './utils.js';
+import { normalizeParams } from './utils';
 
 function pick(obj, keys) {
   const res = {};
@@ -27,51 +26,53 @@ function normalizeOptions(options) {
   return Object.assign({}, options, normalizedOpts);
 }
 
-export default {
-  toHaveBeenRequested(route) {
-    const called = apiMock.called(route.name);
+export default function matchers(apiMock) {
+  return {
+    toHaveBeenRequested(route) {
+      const called = apiMock.called(route.name);
 
-    return {
-      pass: called,
-      message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested`,
-    };
-  },
-  toHaveBeenRequestedWith(route, expectedOptions) {
-    const routeCalls = apiMock.calls.filter(route.name);
-    const matchingCalls = apiMock.calls.filter(route.name, expectedOptions);
-
-    const routeCalled = routeCalls.length > 0;
-    const optionsMatch = matchingCalls.length > 0;
-
-    if (routeCalled && optionsMatch) {
       return {
-        pass: true,
-        message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n${this.utils.printExpected(expectedOptions)}`,
+        pass: called,
+        message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested`,
       };
-    } else if (routeCalled && !optionsMatch) {
-      const call = last(routeCalls);
-      const optionsKeys = Object.keys(expectedOptions);
-      const actualOptions = pick(call, optionsKeys);
-      const diffString = diff(normalizeOptions(expectedOptions), actualOptions, {
-        expand: true,
-      });
+    },
+    toHaveBeenRequestedWith(route, expectedOptions) {
+      const routeCalls = apiMock.calls.filter(route.name);
+      const matchingCalls = apiMock.calls.filter(route.name, expectedOptions);
+
+      const routeCalled = routeCalls.length > 0;
+      const optionsMatch = matchingCalls.length > 0;
+
+      if (routeCalled && optionsMatch) {
+        return {
+          pass: true,
+          message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n${this.utils.printExpected(expectedOptions)}`,
+        };
+      } else if (routeCalled && !optionsMatch) {
+        const call = last(routeCalls);
+        const optionsKeys = Object.keys(expectedOptions);
+        const actualOptions = pick(call, optionsKeys);
+        const diffString = diff(normalizeOptions(expectedOptions), actualOptions, {
+          expand: true,
+        });
+
+        return {
+          actual: actualOptions,
+          pass: false,
+          message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n`
+            + `${this.utils.printExpected(expectedOptions)}\n`
+            + `Received:\n`
+            + `${this.utils.printReceived(actualOptions)}\n\nDifference:\n\n${diffString}`,
+        };
+      }
 
       return {
-        actual: actualOptions,
+        actual: 'not called',
         pass: false,
         message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n`
-        + `${this.utils.printExpected(expectedOptions)}\n`
-        + `Received:\n`
-        + `${this.utils.printReceived(actualOptions)}\n\nDifference:\n\n${diffString}`,
+          + `${this.utils.printExpected(expectedOptions)}\n`
+          + `Received:\n${this.utils.printReceived('not called')}`,
       };
-    }
-
-    return {
-      actual: 'not called',
-      pass: false,
-      message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n`
-      + `${this.utils.printExpected(expectedOptions)}\n`
-      + `Received:\n${this.utils.printReceived('not called')}`,
-    };
-  },
+    },
+  };
 }

@@ -23,7 +23,7 @@
     "jest": "^22.4.0"
   },
   "devDependencies": {
-    "api-mock": "file:///home/acherti/Code/alaya/api-mock",
+    "api-mock": "git+https://github.com/adimux/api-mock.git",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^23.6.0",
