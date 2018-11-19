@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/adimux/api-mock-jest#readme",
   "dependencies": {
-    "api-mock": "file:///home/acherti/Code/alaya/api-mock",
     "jest": "^22.4.0"
   },
   "devDependencies": {
