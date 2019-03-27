@@ -1,5 +1,5 @@
 import diff from 'jest-diff';
-import { normalizeParams } from './utils';
+import { normalizeParams, formDataToObject } from './utils';
 
 function pick(obj, keys) {
   const res = {};
@@ -15,13 +15,38 @@ function last(list) {
   return list[list.length - 1];
 }
 
-function normalizeOptions(options) {
+function isFormData(obj) {
+  if (window && window.FormData) {
+    return obj instanceof window.FormData;
+  }
+  return false;
+}
+
+function normalizeBody(body) {
+  if (isFormData(body)) {
+    return formDataToObject(body);
+  }
+  return body;
+}
+
+function normalizeExpectedOptions(options) {
   const normalizedOpts = {};
   if ('params' in options) {
     normalizedOpts.params = normalizeParams(options.params);
   }
   if ('query' in options) {
     normalizedOpts.query = normalizeParams(options.query);
+  }
+  if ('body' in options) {
+    normalizedOpts.body = normalizeBody(options.body);
+  }
+  return Object.assign({}, options, normalizedOpts);
+}
+
+function normalizeActualOptions(options) {
+  const normalizedOpts = {};
+  if (options.body) {
+    normalizedOpts.body = normalizeBody(options.body);
   }
   return Object.assign({}, options, normalizedOpts);
 }
@@ -52,7 +77,9 @@ export default function matchers(apiMock) {
         const call = last(routeCalls);
         const optionsKeys = Object.keys(expectedOptions);
         const actualOptions = pick(call, optionsKeys);
-        const diffString = diff(normalizeOptions(expectedOptions), actualOptions, {
+	const normExpected = normalizeExpectedOptions(expectedOptions);
+	const normActual = normalizeActualOptions(actualOptions);
+        const diffString = diff(normExpected, normActual, {
           expand: true,
         });
 
@@ -60,9 +87,9 @@ export default function matchers(apiMock) {
           actual: actualOptions,
           pass: false,
           message: () => `Expect ${this.utils.printExpected(route.name)} to have been requested with:\n`
-            + `${this.utils.printExpected(expectedOptions)}\n`
+            + `${this.utils.printExpected(normExpected)}\n`
             + `Received:\n`
-            + `${this.utils.printReceived(actualOptions)}\n\nDifference:\n\n${diffString}`,
+            + `${this.utils.printReceived(normActual)}\n\nDifference:\n\n${diffString}`,
         };
       }
 
