@@ -27,13 +27,38 @@ function last(list) {
   return list[list.length - 1];
 }
 
-function normalizeOptions(options) {
+function isFormData(obj) {
+  if (window && window.FormData) {
+    return obj instanceof window.FormData;
+  }
+  return false;
+}
+
+function normalizeBody(body) {
+  if (isFormData(body)) {
+    return (0, _utils.formDataToObject)(body);
+  }
+  return body;
+}
+
+function normalizeExpectedOptions(options) {
   var normalizedOpts = {};
   if ('params' in options) {
     normalizedOpts.params = (0, _utils.normalizeParams)(options.params);
   }
   if ('query' in options) {
     normalizedOpts.query = (0, _utils.normalizeParams)(options.query);
+  }
+  if ('body' in options) {
+    normalizedOpts.body = normalizeBody(options.body);
+  }
+  return Object.assign({}, options, normalizedOpts);
+}
+
+function normalizeActualOptions(options) {
+  var normalizedOpts = {};
+  if (options.body) {
+    normalizedOpts.body = normalizeBody(options.body);
   }
   return Object.assign({}, options, normalizedOpts);
 }
@@ -72,7 +97,9 @@ function matchers(apiMock) {
         var call = last(routeCalls);
         var optionsKeys = Object.keys(expectedOptions);
         var actualOptions = pick(call, optionsKeys);
-        var diffString = (0, _jestDiff2.default)(normalizeOptions(expectedOptions), actualOptions, {
+        var normExpected = normalizeExpectedOptions(expectedOptions);
+        var normActual = normalizeActualOptions(actualOptions);
+        var diffString = (0, _jestDiff2.default)(normExpected, normActual, {
           expand: true
         });
 
@@ -80,7 +107,7 @@ function matchers(apiMock) {
           actual: actualOptions,
           pass: false,
           message: function message() {
-            return 'Expect ' + _this2.utils.printExpected(route.name) + ' to have been requested with:\n' + (_this2.utils.printExpected(expectedOptions) + '\n') + 'Received:\n' + (_this2.utils.printReceived(actualOptions) + '\n\nDifference:\n\n' + diffString);
+            return 'Expect ' + _this2.utils.printExpected(route.name) + ' to have been requested with:\n' + (_this2.utils.printExpected(normExpected) + '\n') + 'Received:\n' + (_this2.utils.printReceived(normActual) + '\n\nDifference:\n\n' + diffString);
           }
         };
       }

@@ -1,6 +1,6 @@
 {
   "name": "@adimux/api-mock-jest",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Matchers to test API calls for Jest",
   "main": "dist/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "jest": "^22.4.0"
   },
   "devDependencies": {
-    "api-mock": "git+https://github.com/adimux/api-mock.git",
+    "api-mock": "@adimux/api-mock",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^23.6.0",

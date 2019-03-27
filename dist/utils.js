@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.normalizeParams = normalizeParams;
+exports.formDataToObject = formDataToObject;
 function normalizeValue(value) {
   if (typeof value === 'string') {
     return value;
@@ -21,4 +22,20 @@ function normalizeParams(params) {
     normalized[key] = normalizeValue(params[key]);
   });
   return normalized;
+}
+
+function formDataToObject(formData) {
+  var output = {};
+  formData.forEach(function (value, key) {
+    if (Object.prototype.hasOwnProperty.call(output, key)) {
+      var current = output[key];
+      if (!Array.isArray(current)) {
+        current = output[key] = [current];
+      }
+      current.push(value);
+    } else {
+      output[key] = value;
+    }
+  });
+  return output;
 }
